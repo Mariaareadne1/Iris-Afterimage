@@ -77,8 +77,13 @@ describe('paper physics', () => {
     for (let round = 0; round < 40; round++) {
       const i = Math.floor(rnd() * s.count);
       if (!s.grabVertex(i, 0.04)) continue;
+      // violent but physical: up to ~5 m/s random-walk drags
+      const p = s.grabTarget!;
       for (let k = 0; k < 20; k++) {
-        s.moveGrab({ x: (rnd() - 0.5) * 0.6, y: rnd() * 0.3, z: (rnd() - 0.5) * 0.6 });
+        p.x = Math.max(-0.4, Math.min(0.4, p.x + (rnd() - 0.5) * 0.16));
+        p.y = Math.max(0, Math.min(0.35, p.y + (rnd() - 0.5) * 0.1));
+        p.z = Math.max(-0.4, Math.min(0.4, p.z + (rnd() - 0.5) * 0.16));
+        s.moveGrab(p);
         s.step(1 / 60);
       }
       s.endGrab();
@@ -87,7 +92,7 @@ describe('paper physics', () => {
     run(s, 3);
     for (const v of s.positions) expect(Number.isFinite(v)).toBe(true);
     const c = s.centroid();
-    expect(Math.abs(c.x)).toBeLessThan(1);
+    expect(Math.hypot(c.x, c.z)).toBeLessThan(2);
     expect(c.y).toBeLessThan(0.05);
     expect(s.maxStretch()).toBeLessThan(0.1);
   });

@@ -45,8 +45,8 @@ export const DEFAULT_PAPER_PARAMS: PaperParams = {
   gravity: 9.81,
   airDamping: 0.035,
   liquidDamping: 0.22,
-  submergedGravity: 0.12,
-  iterations: 18,
+  submergedGravity: 0.3,
+  iterations: 12,
   friction: 0.6,
   curl: 0.006,
 };
@@ -64,7 +64,7 @@ export interface PaperEnvironment {
 export const FLAT_GROUND: PaperEnvironment = { floorAt: () => 0, bounds: null, liquidLevel: null };
 
 const SUBSTEP = 1 / 120;
-const MAX_SUBSTEPS = 4;
+const MAX_SUBSTEPS = 12;
 const THICKNESS = 0.0012;
 const MAX_EXTENT = 20;
 /** max distance a vertex may travel per substep (≈ 6 m/s) */
@@ -208,6 +208,49 @@ export class PaperSim {
     this.grabAnchor = -1;
     this.rebuildTethers();
     this.accumulator = 0;
+  }
+
+  /** Flat rest positions for a placement (no side effects). */
+  flatPositions(center: Vec3, yaw = 0): Float32Array {
+    const out = new Float32Array(this.count * 3);
+    const sx = this.width / this.segX;
+    const sy = this.height / this.segY;
+    const c = Math.cos(yaw);
+    const s = Math.sin(yaw);
+    let k = 0;
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        const lx = (x - this.segX / 2) * sx;
+        const lz = (y - this.segY / 2) * sy;
+        out[k] = center.x + lx * c + lz * s;
+        out[k + 1] = center.y;
+        out[k + 2] = center.z - lx * s + lz * c;
+        k += 3;
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Ease the sheet toward lying flat at a placement — a printer pressing a
+   * print down with tongs. Kills velocity proportionally. k in 0..1 per call.
+   */
+  blendToFlat(center: Vec3, yaw: number, k: number) {
+    const target = this.flatPositions(center, yaw);
+    const t = Math.min(Math.max(k, 0), 1);
+    const p = this.positions;
+    for (let i = 0; i < p.length; i++) {
+      p[i] += (target[i] - p[i]) * t;
+      this.prev[i] += (p[i] - this.prev[i]) * Math.min(1, t * 2);
+    }
+  }
+
+  /** Yaw of the sheet's local x axis in the xz plane (radians). */
+  yaw(): number {
+    const midY = Math.round(this.segY / 2) * this.cols;
+    const a = this.vertex(midY);
+    const b = this.vertex(midY + this.segX);
+    return Math.atan2(-(b.z - a.z), b.x - a.x);
   }
 
   /** Grid index of a corner: 'tl','tr','bl','br' (t = row 0). */
@@ -354,13 +397,28 @@ export class PaperSim {
     this.rebuildTethers();
   }
 
+  /**
+   * Add a small horizontal velocity to submerged (or all, if dry) vertices —
+   * the sheet sliding when its tray is rocked.
+   */
+  nudge(dx: number, dz: number) {
+    if (![dx, dz].every(Number.isFinite)) return;
+    const liquid = this.env.liquidLevel;
+    for (let i = 0; i < this.count; i++) {
+      const k = i * 3;
+      if (liquid !== null && this.positions[k + 1] > liquid) continue;
+      this.prev[k] -= dx;
+      this.prev[k + 2] -= dz;
+    }
+  }
+
   get recoveryCount(): number {
     return this.recoveries;
   }
 
   step(dt: number) {
     if (!(dt > 0)) return;
-    this.accumulator += Math.min(dt, 0.05);
+    this.accumulator += Math.min(dt, MAX_SUBSTEPS * SUBSTEP);
     let steps = 0;
     while (this.accumulator >= SUBSTEP && steps < MAX_SUBSTEPS) {
       this.substep();
@@ -415,7 +473,7 @@ export class PaperSim {
       this.applyGrab();
       this.applyPins();
       this.applyTethers();
-      this.collide();
+      if (it % 3 === 2) this.collide();
     }
     // strain limiting: two structural-only passes keep the image unstretched
     for (let pass = 0; pass < 2; pass++) {
@@ -434,6 +492,7 @@ export class PaperSim {
       this.applyGrab();
       this.applyPins();
     }
+    this.collide();
   }
 
   private applyGrab() {
