@@ -1,0 +1,13 @@
+node_modules
+dist
+*.local
+.DS_Store
+test-results
+playwright-report
+blob-report
+/captures
+*.webm
+*.mp4
+!public/**/*.mp4
+coverage
+.vite
