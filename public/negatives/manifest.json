@@ -1,9 +1,64 @@
 {
   "negatives": [
-    { "id": "tetons", "file": "tetons.jpg", "title": "The Tetons and the Snake River", "author": "Ansel Adams", "year": "1942", "license": "Public domain", "source": "https://commons.wikimedia.org/wiki/File:Adams_The_Tetons_and_the_Snake_River.jpg", "frame": "07", "width": 2000, "height": 1601 },
-    { "id": "pike-henry", "file": "pike-henry.jpg", "title": "Pike and Henry Streets, Manhattan", "author": "Berenice Abbott", "year": "1936", "license": "Public domain", "source": "https://commons.wikimedia.org/wiki/File:Pike_and_Henry_Streets,_Manhattan_(NYPL_b13668355-482679).jpg", "frame": "12", "width": 2000, "height": 1582 },
-    { "id": "herschel", "file": "herschel.jpg", "title": "Sir John Herschel", "author": "Julia Margaret Cameron", "year": "1867", "license": "Public domain", "source": "https://commons.wikimedia.org/wiki/File:Julia_Margaret_Cameron_-_John_Herschel_(Metropolitan_Museum_of_Art_copy,_restored).jpg", "frame": "04", "width": 1593, "height": 2000 },
-    { "id": "construction", "file": "construction.jpg", "title": "Construction Old and New, from 37 Washington Street", "author": "Berenice Abbott", "year": "1936", "license": "Public domain", "source": "https://commons.wikimedia.org/wiki/File:Construction_old_and_new_from_37_Washington_Street,_New_York_City_(cropped).jpg", "frame": "18", "width": 1425, "height": 1800 },
-    { "id": "still-life", "file": "still-life.jpg", "title": "Still Life with Fruit and Decanter", "author": "Roger Fenton", "year": "1860", "license": "Public domain", "source": "https://commons.wikimedia.org/wiki/File:Roger_Fenton_(English_-_Still_Life_with_Fruit_and_Decanter_-_Google_Art_Project.jpg", "frame": "23", "width": 2000, "height": 1829 }
+    {
+      "id": "tetons",
+      "file": "tetons.jpg",
+      "title": "The Tetons and the Snake River",
+      "author": "Ansel Adams",
+      "year": "1942",
+      "license": "Public domain",
+      "source": "https://commons.wikimedia.org/wiki/File:Adams_The_Tetons_and_the_Snake_River.jpg",
+      "frame": "07",
+      "width": 2000,
+      "height": 1601
+    },
+    {
+      "id": "pike-henry",
+      "file": "pike-henry.jpg",
+      "title": "Pike and Henry Streets, Manhattan",
+      "author": "Berenice Abbott",
+      "year": "1936",
+      "license": "Public domain",
+      "source": "https://commons.wikimedia.org/wiki/File:Pike_and_Henry_Streets,_Manhattan_(NYPL_b13668355-482679).jpg",
+      "frame": "12",
+      "width": 2000,
+      "height": 1582
+    },
+    {
+      "id": "herschel",
+      "file": "herschel.jpg",
+      "title": "Sir John Herschel",
+      "author": "Julia Margaret Cameron",
+      "year": "1867",
+      "license": "Public domain",
+      "source": "https://commons.wikimedia.org/wiki/File:Julia_Margaret_Cameron_-_John_Herschel_(Metropolitan_Museum_of_Art_copy,_restored).jpg",
+      "frame": "04",
+      "width": 1593,
+      "height": 2000
+    },
+    {
+      "id": "construction",
+      "file": "construction.jpg",
+      "title": "Construction Old and New, from 37 Washington Street",
+      "author": "Berenice Abbott",
+      "year": "1936",
+      "license": "Public domain",
+      "source": "https://commons.wikimedia.org/wiki/File:Construction_old_and_new_from_37_Washington_Street,_New_York_City_(cropped).jpg",
+      "frame": "18",
+      "width": 1425,
+      "height": 1800
+    },
+    {
+      "id": "still-life",
+      "file": "still-life.jpg",
+      "title": "Still Life with Fruit and Decanter",
+      "author": "Roger Fenton",
+      "year": "1860",
+      "license": "Public domain",
+      "source": "https://commons.wikimedia.org/wiki/File:Roger_Fenton_(English_-_Still_Life_with_Fruit_and_Decanter_-_Google_Art_Project.jpg",
+      "frame": "23",
+      "width": 2000,
+      "height": 1829
+    }
   ]
 }
