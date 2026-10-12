@@ -36,10 +36,38 @@ function useToolKeys() {
   }, [s.tool, session]);
 }
 
+/**
+ * Footswitch shortcuts: E exposes, B burns — so your hand (the pointer) can
+ * stay over the paper holding a dodger or burning card.
+ */
+function useFootswitch() {
+  const { session } = useApp();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(input|textarea|select)$/i.test(t.tagName)) && (t as HTMLInputElement).type !== 'range') return;
+      const s = session.state;
+      if (s.stage !== 'enlarger') return;
+      const key = e.key.toLowerCase();
+      if (key === 'e' && (s.mode === 'manual' || !s.locked)) {
+        e.preventDefault();
+        session.expose();
+      } else if (key === 'b' && s.mode === 'manual') {
+        e.preventDefault();
+        session.burn();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [session]);
+}
+
 export function EnlargerPanel() {
   const { session } = useApp();
   const s = useSessionState();
   useToolKeys();
+  useFootswitch();
   if (s.stage !== 'enlarger') return null;
   const lampRunning = s.lamp.mode === 'expose' || s.lamp.mode === 'burn';
   const exposed = s.locked && s.exposedSeconds > 0;
@@ -219,7 +247,7 @@ export function ManualControls() {
               type="range" min={0.05} max={0.32} step={0.005} value={s.toolRadius}
               onChange={(e) => session.setToolRadius(Number(e.target.value))} aria-label="Tool size" data-testid="tool-size"
             />
-            <p className="control__hint">Arrow keys move the tool · Esc puts it down</p>
+            <p className="control__hint">Arrow keys move the tool · Esc puts it down · press {s.tool === 'burn' ? 'B to burn' : 'E to expose'} without leaving the paper</p>
           </>
         )}
         {s.tool === 'burn' && (

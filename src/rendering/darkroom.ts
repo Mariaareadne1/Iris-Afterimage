@@ -541,6 +541,17 @@ export class Darkroom {
     this.rig.setViewport(w, h);
   }
 
+  get cameraSettled(): boolean {
+    return this.rig.settled;
+  }
+
+  /** Screen position (0..1, y down) of a point in the image area — for tests and tooling. */
+  imageUVToScreen(u: number, v: number): { x: number; y: number } {
+    const r = this.imageRectWorld();
+    const p = new THREE.Vector3(r.x - r.w / 2 + u * r.w, EASEL_TOP + 0.002, r.z - r.d / 2 + v * r.d).project(this.camera);
+    return { x: (p.x + 1) / 2, y: (1 - p.y) / 2 };
+  }
+
   /** Diagnostics for tests. */
   debug() {
     const sim = this.paper.sim;
