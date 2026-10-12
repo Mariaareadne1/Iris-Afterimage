@@ -155,6 +155,21 @@ export class ExposureField {
     return f;
   }
 
+  /** Restore a field from raw data (e.g. after crossing into a worker). */
+  static fromData(aspect: number, longSide: number, data: Float32Array): ExposureField {
+    const f = new ExposureField(aspect, longSide);
+    if (data.length !== f.data.length) throw new Error('Exposure field size mismatch');
+    for (let i = 0; i < data.length; i++) {
+      const v = data[i];
+      f.data[i] = Number.isFinite(v) ? Math.min(Math.max(v, 0), MAX_FIELD_SECONDS) : 0;
+    }
+    return f;
+  }
+
+  get longSide(): number {
+    return Math.max(this.width, this.height);
+  }
+
   /** Rebuild a field by replaying an op log — the result is identical. */
   static replay(aspect: number, ops: readonly ExposureOp[], longSide = 256): ExposureField {
     const f = new ExposureField(aspect, longSide);
