@@ -11,3 +11,5 @@ blob-report
 !public/**/*.mp4
 coverage
 .vite
+.claude/
+*.tsbuildinfo
