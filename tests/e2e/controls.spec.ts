@@ -6,7 +6,6 @@ import { correlation, developAndDownload, gradientEnergy, grid, pointAtImage, re
  * Every enlarger control must change the actual developed print, measured on
  * the exported PNG files (not the preview).
  */
-test.describe.configure({ mode: 'serial' });
 
 async function freshSheet(page: Page) {
   const stage = await state<string>(page, 's.stage');

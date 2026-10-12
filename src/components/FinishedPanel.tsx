@@ -101,6 +101,9 @@ export function PrintViewer({ rec, onClose }: { rec: PrintRecord; onClose: () =>
   const [url, setUrl] = useState<string | null>(null);
   const [zoom, setZoom] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
+  // keep the latest onClose without re-running the effect (which would revoke the image URL)
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   useEffect(() => {
     let alive = true;
     let objectUrl: string | null = null;
@@ -110,14 +113,14 @@ export function PrintViewer({ rec, onClose }: { rec: PrintRecord; onClose: () =>
       setUrl(objectUrl);
     });
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCloseRef.current();
     window.addEventListener('keydown', onKey);
     return () => {
       alive = false;
       window.removeEventListener('keydown', onKey);
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [rec, onClose]);
+  }, [rec]);
   return (
     <div className="viewer" role="dialog" aria-modal="true" aria-label="Print viewer" onClick={onClose}>
       <button ref={closeRef} className="viewer__close" onClick={onClose} aria-label="Close">×</button>

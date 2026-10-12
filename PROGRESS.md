@@ -2,47 +2,71 @@
 
 _Living log. Updated at every milestone so work can resume after an interruption._
 
+**Live:** https://mariaareadne1.github.io/Iris-Afterimage/ (GitHub Pages, deployed by `.github/workflows/deploy.yml`, verified with `tests/e2e/live.spec.ts`)
+
 ## Status
 
 | Area | State |
 |---|---|
 | Photographic model (negative → enlarger → paper → development) | ✅ implemented, unit-tested |
 | Paper physics (adapted Iris Verlet cloth) | ✅ implemented, unit-tested |
-| 3D darkroom (enlarger, easel, trays, liquids, safelights, drying line) | ✅ working |
-| Quick Print flow | ✅ working end-to-end |
-| Manual darkroom (focus, time, grade, crop, dodge, burn) | ✅ working |
-| Export (PNG, bordered PNG, worker) | ✅ working |
-| Capture (canvas recording, showcase, clean mode) | 🟡 implemented, browser test pending |
-| Embed mode `?embed=1` | 🟡 implemented, test pending |
-| 2D fallback without WebGL | 🟡 implemented, test pending |
-| Full E2E suite (downloads, uploads, mobile, modes, embed) | ⏳ in progress |
-| Aesthetic refinement pass | ⏳ pending |
-| Docs (README, architecture, photography model, testing) | ⏳ pending |
-| Deployment | ⏳ pending |
+| 3D darkroom (enlarger, easel, trays, liquids, safelights, drying line) | ✅ |
+| Quick Print flow | ✅ E2E |
+| Manual darkroom (focus, time, grade, crop, dodge, burn, pull early, agitation) | ✅ E2E, measured on exported PNGs |
+| Import (portrait / landscape / huge / corrupt) | ✅ E2E |
+| Export (PNG, bordered PNG, worker, viewer, contact sheet) | ✅ E2E |
+| Capture (canvas recording MP4/WebM, clean mode, automated showcase) | ✅ E2E |
+| Embed mode `?embed=1` | ✅ E2E (iframe, parent scroll) |
+| 2D fallback without WebGL | ✅ E2E |
+| Phone layout | ✅ E2E (Pixel 7) |
+| Aesthetic refinement pass | ✅ done (see screenshots in `docs/screenshots/`) |
+| Docs (README, architecture, photography model, testing) | ✅ |
+| Deployment | ✅ GitHub Pages, live smoke test passed |
 
 ## Milestones (commits)
 
 - `8cff9f7` chore: initialize project, MIT notices, 5 public-domain negatives
-- `de6df20` feat: photographic printing model + 34 calibration tests
-- `883b224` feat: paper physics + 9 physics tests
+- `de6df20` feat: photographic printing model + calibration tests
+- `883b224` feat: paper physics
 - `01f161f` perf: cheaper, steadier paper solver
 - `d366904` feat: photographic darkroom scene + session controller
-- `b6d365b` feat: interface, quick print, manual controls, export, capture
+- `b6d365b` feat: interface, quick print, manual controls, export, capture, fallback
 - `3d6d5c3` test: Playwright visual walkthrough
+- `b82e4f6` feat: footswitch shortcuts (E / B)
+- `7e60dc6` fix: phone layout
+- `de9401c` test: end-to-end validation of the printing pipeline
+- `style` refine darkroom lighting · `feat` OG image · `feat` portfolio tooling · `ci` GitHub Pages
+- `fix` carries between trays · `fix` print viewer · `docs` README and docs (this milestone)
 
-## Test outcomes (latest)
+## Test outcomes (latest full run)
 
-- `npm test` — 43/43 unit tests pass (model, dodge/burn, development, physics)
-- `npx playwright test smoke visual` — 2/2 pass on the production build (headless Chromium, hardware WebGL, ~60 fps)
+- Typecheck: clean
+- `npm test`: 43/43 unit tests pass
+- Playwright (production build, Chromium 156, hardware WebGL): see the latest
+  run summary below.
 
-## Known issues / next
+Full run on 2026-10-12: **25 passed, 2 skipped** (the opt-in `og` image
+generator and the `live` deployment check, which passed separately against
+https://mariaareadne1.github.io/Iris-Afterimage/). Desktop 1440×900 and Pixel 7.
 
-- Safelight red is over-saturated; safelight reflection in the developer and halo in the final view are too strong
-- Enlarger head reads poorly in the dark (needs rim light)
-- Dodge penumbra slightly hard when the tool is held still
-- Remaining E2E coverage: export pixel verification, dodge/burn via exports, uploads (portrait/landscape/invalid), mobile layout, mode switching, reset reproducibility, embed, capture, WebGL fallback
+One intermittent failure was seen in an earlier full run (the crop test
+timed out waiting once under load). It did not reproduce in 4 isolated
+repeats or the next full run; the controls tests no longer run serially, so a
+single stall can't cascade.
 
-## Environment notes
+## Known issues / limitations
 
-- The Claude desktop browser pane throttles rAF when hidden; use Playwright for timing-sensitive checks.
-- Dev server: `npm run dev` (port 5233 by default, `PORT` env overrides).
+- `scripts/webm-to-mp4.sh` could not be exercised on the development machine:
+  the local Homebrew ffmpeg 8.1 fails to start (missing `libx265.216.dylib`).
+  Chromium 156 records MP4 directly, so conversion is only needed for WebM.
+- The enlarger head is intentionally dim: it reads as a silhouette rather than
+  a detailed model.
+- Split-grade printing, reciprocity failure and developer exhaustion are not
+  modelled (see docs/photography-model.md).
+- The Claude desktop browser pane throttles animation frames while hidden;
+  Playwright headless Chromium runs at ~60 fps and is used for timing checks.
+
+## Next ideas (not started)
+
+Manual 35 mm camera → negative, contact sheets from a roll, double exposure,
+a personal gallery of the photographer's own prints.

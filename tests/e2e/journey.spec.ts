@@ -84,3 +84,21 @@ test.describe('quick print journey', () => {
     expect(await state(page, 's.prints.length')).toBe(2);
   });
 });
+
+test('the print travels developer → stop → fix → line without getting stuck', async ({ page }) => {
+  await ready(page, '/?speed=2&mode=quick');
+  await page.getByTestId('expose').click();
+  await until(page, "s.locked && s.lamp.mode === 'off' && s.paper === 'easel'");
+  await page.getByTestId('develop').click();
+  await until(page, "s.devProgress >= 1");
+  await page.getByTestId('stop-bath').click();
+  for (const tray of ['stop', 'fix']) {
+    await page.waitForFunction((t) => window.__iris!.room!.debug().paperLocation === t, tray, { timeout: 30_000 });
+    const c = await state<{ x: number }>(page, 'R.debug().centroid');
+    const expected = { stop: 0.52, fix: 0.98 }[tray]!;
+    expect(Math.abs(c.x - expected)).toBeLessThan(0.08);
+  }
+  await page.waitForFunction(() => window.__iris!.room!.debug().paperLocation === 'line', null, { timeout: 30_000 });
+  expect(await state(page, 'R.debug().recoveries')).toBe(0);
+  expect(await state<number>(page, 'R.debug().maxStretch')).toBeLessThan(0.1);
+});

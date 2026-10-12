@@ -72,7 +72,7 @@ test('visual walkthrough of a manual print', async ({ page }) => {
 
   await page.getByTestId('stop-bath').click();
   await until(page, "s.stage === 'fix'");
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(2600);
   await shot(page, '09-fixer');
   await until(page, "s.stage === 'finished'");
   await page.waitForTimeout(4000);
@@ -80,6 +80,9 @@ test('visual walkthrough of a manual print', async ({ page }) => {
 
   await page.getByTestId('view-print').click();
   await expect(page.getByTestId('viewer-image')).toBeVisible({ timeout: 30_000 });
+  // the image really decoded (not a broken-image placeholder), and stays decoded
+  await page.waitForTimeout(1500);
+  expect(await page.getByTestId('viewer-image').evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 1000)).toBe(true);
   await page.waitForTimeout(500);
   await shot(page, '11-print-viewer');
 });

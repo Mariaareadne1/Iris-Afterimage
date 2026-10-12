@@ -54,6 +54,8 @@ interface ActiveCarry {
   start: number;
   /** tray whose walls/liquid apply once the sheet is over it */
   dest: TrayDef | null;
+  /** destination walls already applied */
+  arrived?: boolean;
   onDone: () => void;
 }
 
@@ -108,6 +110,9 @@ export class PaperDirector {
   private startCarry(gripIndex: number, to: Vec3, layDir: { x: number; z: number }, length: number, duration: number, dest: TrayDef | null, onDone: () => void) {
     const sim = this.sim;
     sim.clearPins();
+    // lifting out of a tray: its walls no longer apply
+    sim.env = OPEN_ENV;
+    this.settle = null;
     const from = sim.vertex(gripIndex);
     sim.endGrab();
     sim.grabVertex(gripIndex, 0.02);
@@ -193,7 +198,7 @@ export class PaperDirector {
         // two clothes-pegs at the top corners
         const tl = sim.cornerIndex('tl');
         const tr = sim.cornerIndex('tr');
-        const half = sim.width / 2 - 0.012;
+        const half = sim.width / 2 - 0.003;
         sim.endGrab();
         sim.pin(tl, { x: HANG.x - half, y: DRYING_LINE.y - 0.006, z: HANG.z });
         sim.pin(tr, { x: HANG.x + half, y: DRYING_LINE.y - 0.006, z: HANG.z });
@@ -261,7 +266,8 @@ export class PaperDirector {
     const t = Math.min(1, (this.time - c.start) / c.duration);
     const p = this.hangPath && c.plan.length === 0 ? this.hangPath(t) : carryPoint(c.plan, t);
     this.sim.moveGrab(p);
-    if (c.dest && t > 0.45 && this.sim.env.bounds === null) {
+    if (c.dest && t > 0.45 && !c.arrived) {
+      c.arrived = true;
       this.sim.env = trayEnv(c.dest);
       this.location = 'free';
     }
