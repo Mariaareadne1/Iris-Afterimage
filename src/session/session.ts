@@ -100,7 +100,7 @@ export interface SessionState {
 /** Working resolution for interactive textures (long side, px). */
 export const WORK_LONG = 640;
 export const DEFAULT_TOOL_RADIUS = 0.14;
-export const TOOL_FEATHER = 0.65;
+export const TOOL_FEATHER = 0.85;
 
 /** Durations of automated stages, in simulated seconds. */
 export const STAGE_SECONDS = {

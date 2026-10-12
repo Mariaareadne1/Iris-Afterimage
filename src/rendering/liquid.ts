@@ -44,7 +44,7 @@ export class LiquidSurface {
     const transmission = opts.transmission !== false;
     this.material = new THREE.MeshPhysicalMaterial({
       color: opts.color ?? 0xffffff,
-      roughness: 0.035,
+      roughness: 0.085,
       metalness: 0,
       ior: 1.333,
       transmission: transmission ? 1 : 0,
@@ -53,8 +53,8 @@ export class LiquidSurface {
       attenuationDistance: 0.25,
       transparent: !transmission,
       opacity: transmission ? 1 : 0.28,
-      specularIntensity: 1,
-      envMapIntensity: 1.2,
+      specularIntensity: 0.55,
+      envMapIntensity: 0.8,
       depthWrite: false,
     });
     this.mesh = new THREE.Mesh(this.geometry, this.material);

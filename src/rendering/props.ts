@@ -104,8 +104,8 @@ export interface EnlargerParts {
 
 export function buildEnlarger(): EnlargerParts {
   const g = new THREE.Group();
-  const black = new THREE.MeshStandardMaterial({ color: 0x0d0d0e, roughness: 0.42, metalness: 0.25 });
-  const satin = new THREE.MeshStandardMaterial({ color: 0x1b1b1d, roughness: 0.3, metalness: 0.6 });
+  const black = new THREE.MeshStandardMaterial({ color: 0x1d1c1c, roughness: 0.38, metalness: 0.1 });
+  const satin = new THREE.MeshStandardMaterial({ color: 0x2c2b2b, roughness: 0.28, metalness: 0.45 });
   const chrome = new THREE.MeshStandardMaterial({ color: 0xb8b6b2, roughness: 0.18, metalness: 1 });
   const board = new THREE.MeshStandardMaterial({ color: 0x1a1817, roughness: 0.62 });
 
@@ -203,7 +203,7 @@ export interface EaselParts {
 
 export function buildEasel(): EaselParts {
   const g = new THREE.Group();
-  const enamel = new THREE.MeshStandardMaterial({ color: 0xcfc6ae, roughness: 0.45, metalness: 0.05 });
+  const enamel = new THREE.MeshStandardMaterial({ color: 0x8f8877, roughness: 0.5, metalness: 0.05 });
   const plate = new THREE.Mesh(new RoundedBoxGeometry(EASEL.w, EASEL.h, EASEL.d, 2, 0.003), enamel);
   plate.position.set(EASEL.x, BASEBOARD.h + EASEL.h / 2, EASEL.z);
   g.add(plate);
@@ -231,7 +231,7 @@ export function layoutBlades(
     blades.remove(c);
     (c as THREE.Mesh).geometry.dispose();
   }
-  const mat = new THREE.MeshStandardMaterial({ color: 0xd9d1bb, roughness: 0.4, metalness: 0.15 });
+  const mat = new THREE.MeshStandardMaterial({ color: 0x5a564d, roughness: 0.35, metalness: 0.35 });
   const y = EASEL_TOP + 0.0045;
   const t = 0.003;
   const pad = 0.018;
@@ -367,15 +367,15 @@ export function buildSafelight(scale = 1): SafelightParts {
   group.add(bracket);
   const lens = new THREE.Mesh(
     new THREE.CircleGeometry(0.078, 48),
-    new THREE.MeshStandardMaterial({ color: 0x1a0302, emissive: 0xff1c08, emissiveIntensity: 1.35, roughness: 0.25, toneMapped: false }),
+    new THREE.MeshStandardMaterial({ color: 0x1a0302, emissive: 0xff1a06, emissiveIntensity: 1.1, roughness: 0.25, toneMapped: false }),
   );
   lens.position.z = 0.0455;
   group.add(lens);
   const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTexture(), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
-  halo.scale.set(0.9, 0.9, 1);
+  halo.scale.set(0.55, 0.55, 1);
   halo.position.z = 0.05;
   group.add(halo);
-  const light = new THREE.PointLight(0xff2c10, 3.2, 0, 1.4);
+  const light = new THREE.PointLight(0xff1e06, 2.1, 0, 1.4);
   light.position.set(0, -0.02, 0.12);
   group.add(light);
   return { group, light, lens, halo };

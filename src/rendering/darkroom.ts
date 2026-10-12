@@ -112,7 +112,7 @@ export class Darkroom {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
     renderer.setSize(w, h);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 0.92;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.domElement.setAttribute('aria-label', 'Darkroom — interactive 3D scene');
     renderer.domElement.setAttribute('role', 'img');
@@ -125,12 +125,12 @@ export class Darkroom {
 
     this.envs = createEnvironments(renderer);
     this.scene.environment = this.envs.dark;
-    this.scene.environmentIntensity = 0.55;
+    this.scene.environmentIntensity = 0.4;
     this.scene.background = new THREE.Color(0x040302);
     this.scene.fog = new THREE.Fog(0x040302, 2.2, 5.5);
 
     // ── lights ──
-    this.hemi = new THREE.HemisphereLight(0x3a120a, 0x050202, 0.6);
+    this.hemi = new THREE.HemisphereLight(0x2a0804, 0x030101, 0.45);
     this.scene.add(this.hemi);
     this.roomKey = new THREE.DirectionalLight(0xfff0dc, 0);
     this.roomKey.position.set(0.6, 2.4, 1.4);
@@ -147,7 +147,7 @@ export class Darkroom {
     this.easel = buildEasel();
     this.scene.add(this.easel.group);
     this.easelUniforms = createPrintUniforms();
-    this.easel.receiver.material = createPrintMaterial(this.easelUniforms, { receiverOnly: true, color: 0xd6ceb6 });
+    this.easel.receiver.material = createPrintMaterial(this.easelUniforms, { receiverOnly: true, color: 0x9a927f });
     this.trays = buildTrays();
     for (const t of this.trays) {
       this.scene.add(t.group);
@@ -217,7 +217,8 @@ export class Darkroom {
     }
     if (prev && prev.stage !== s.stage && s.stage === 'developing') {
       // a wet sheet is glossy
-      this.paper.material.clearcoat = 0.85;
+      this.paper.material.clearcoat = 0.6;
+      this.paper.material.clearcoatRoughness = 0.3;
     }
     if (s.stage === 'enlarger' && prev?.stage !== 'enlarger') this.paper.material.clearcoat = 0;
   }
@@ -493,13 +494,15 @@ export class Darkroom {
     const target = s.lightsOn ? 1 : 0;
     this.lightsLevel += (target - this.lightsLevel) * (1 - Math.exp(-dt * 1.4));
     const L = this.lightsLevel;
-    this.hemi.color.setRGB(0.23 + L * 0.7, 0.07 + L * 0.66, 0.04 + L * 0.6);
-    this.hemi.intensity = 0.6 + L * 0.7;
+    this.hemi.color.setRGB(0.16 + L * 0.77, 0.03 + L * 0.7, 0.015 + L * 0.62);
+    this.hemi.intensity = 0.45 + L * 0.85;
     this.roomKey.intensity = L * 2.2;
-    this.safelight.light.intensity = 3.2 * (1 - L * 0.6);
-    this.safelight2.light.intensity = 1.6 * (1 - L * 0.6);
+    this.safelight.light.intensity = 2.1 * (1 - L * 0.6);
+    this.safelight2.light.intensity = 1.3 * (1 - L * 0.6);
+    this.safelight.halo.material.opacity = 1 - L * 0.75;
+    this.safelight2.halo.material.opacity = 1 - L * 0.75;
     this.scene.environment = L > 0.5 ? this.envs.lit : this.envs.dark;
-    this.scene.environmentIntensity = 0.55 + L * 0.5;
+    this.scene.environmentIntensity = 0.4 + L * 0.65;
     const bg = new THREE.Color(0x040302).lerp(new THREE.Color(0x24211e), L);
     (this.scene.background as THREE.Color).copy(bg);
     (this.scene.fog as THREE.Fog).color.copy(bg);

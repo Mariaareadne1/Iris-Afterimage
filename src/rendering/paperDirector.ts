@@ -136,8 +136,8 @@ export class PaperDirector {
   private settle: { center: Vec3; yaw: number; until: number } | null = null;
 
   /** Press the sheet flat where it lies in its tray (keeps it inside the walls). */
-  settleInTray(def: TrayDef, duration = 1.4) {
-    const c = this.sim.centroid();
+  settleInTray(def: TrayDef, duration = 1.4, centre = false) {
+    const c = centre ? { x: def.x, y: 0, z: def.z } : this.sim.centroid();
     const m = 0.012;
     const hx = def.x - TRAY.w / 2 + this.sim.width / 2 + m;
     const hx2 = def.x + TRAY.w / 2 - this.sim.width / 2 - m;
@@ -164,7 +164,7 @@ export class PaperDirector {
     this.startCarry(sim.edgeMidIndex('left'), { x: def.x, y: TRAY.floor, z: def.z }, { x: 1, z: 0 }, sim.width, duration, def, () => {
       this.location = def.id;
       this.onSplash?.(def, 1);
-      this.settleInTray(def);
+      this.settleInTray(def, 1.4, true);
     });
   }
 

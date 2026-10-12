@@ -21,7 +21,7 @@ function room(lightsOn: boolean): THREE.Scene {
     scene.add(m);
   };
   // the safelight as seen from the trays
-  add(0xff2a10, lightsOn ? 2 : 14, 0.3, 0.3, [SAFELIGHT.x, SAFELIGHT.y, SAFELIGHT.z]);
+  add(0xff2a10, lightsOn ? 1.5 : 5, 0.22, 0.22, [SAFELIGHT.x, SAFELIGHT.y, SAFELIGHT.z]);
   if (lightsOn) {
     add(0xfff1dc, 3.2, 2.2, 0.5, [0, 2.3, 0.6], 0); // ceiling fixture
     add(0xfff6ea, 1.1, 1.6, 1.2, [1.8, 1.2, 1.4]); // window-ish fill

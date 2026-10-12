@@ -70,7 +70,7 @@ float ign(vec2 p) { return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00
 
 export function createPrintMaterial(uniforms: PrintUniforms, opts: { receiverOnly?: boolean; color?: THREE.ColorRepresentation } = {}) {
   const mat = new THREE.MeshPhysicalMaterial({
-    color: opts.color ?? new THREE.Color(0.93, 0.915, 0.885),
+    color: opts.color ?? new THREE.Color(0.86, 0.845, 0.815),
     roughness: opts.receiverOnly ? 0.7 : 0.52,
     metalness: 0,
     clearcoat: 0,
