@@ -2,7 +2,7 @@
  * Records the darkroom canvas with MediaRecorder. Only the WebGL canvas is
  * captured, so interface chrome never appears in the video. The container is
  * whatever the browser actually supports — MP4 is offered only when
- * MediaRecorder reports it; otherwise WebM (convert with scripts/webm-to-mp4.sh).
+ * MediaRecorder reports it; otherwise WebM (scripts/prepare-video.mjs converts either for social).
  */
 const CANDIDATES = [
   'video/mp4;codecs=avc1.640028',

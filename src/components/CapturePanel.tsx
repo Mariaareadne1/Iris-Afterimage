@@ -45,7 +45,7 @@ export function CapturePanel({ onClose, setClean, clean }: Props) {
     const blob = await r.stop();
     const ext = extensionFor(r.mime);
     downloadBlob(blob, `iris-afterimage-${Date.now()}.${ext}`);
-    setStatus(ext === 'webm' ? 'Saved as WebM. For MP4, run scripts/webm-to-mp4.sh on it.' : 'Saved as MP4.');
+    setStatus(ext === 'webm' ? 'Saved as WebM video.' : 'Saved as MP4 video.');
   };
 
   const showcase = async (record: boolean) => {

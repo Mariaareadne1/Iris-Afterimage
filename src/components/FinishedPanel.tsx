@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { downloadBlob, jobFromRecord, printFilename, renderPNG, thumbnailURL } from '../capture/export.ts';
+import { sharePrint } from '../capture/share.ts';
 import { DEVELOPER, gradeLabel } from '../photography/index.ts';
 import type { PrintRecord } from '../session/session.ts';
 import { formatSeconds, useApp, useSessionState } from './hooks.ts';
@@ -40,6 +41,7 @@ export function FinishedPanel({ onCapture }: { onCapture: () => void }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [viewing, setViewing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shared, setShared] = useState<string | null>(null);
   const rec = s.prints.find((p) => p.id === s.currentPrintId) ?? null;
 
   // contact-sheet thumbnail + warm the export cache in the background
@@ -70,6 +72,26 @@ export function FinishedPanel({ onCapture }: { onCapture: () => void }) {
     }
   };
 
+  const share = async () => {
+    setBusy('share');
+    setError(null);
+    try {
+      const result = await sharePrint(rec, await printPNG(rec, true));
+      const messages: Record<string, string | null> = {
+        'shared-file': null,
+        'shared-link': null,
+        cancelled: null,
+        copied: 'Link copied — paste it anywhere.',
+        unavailable: 'Sharing isn’t available here — download the print instead.',
+      };
+      setShared(messages[result] ?? null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not share the print.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <>
       <section className="panel panel--finished" aria-label="Finished print">
@@ -88,8 +110,12 @@ export function FinishedPanel({ onCapture }: { onCapture: () => void }) {
         <div className="panel__row panel__row--wrap">
           <button className="btn btn--text" onClick={() => session.printAgain()} data-testid="print-again">Print again</button>
           <button className="btn btn--text" onClick={() => session.printAgain()} data-testid="another-negative">Try another negative</button>
-          {!embed && <button className="btn btn--text" onClick={onCapture}>Share / capture</button>}
+          <button className="btn btn--text" onClick={share} disabled={busy !== null} data-testid="share">
+            {busy === 'share' ? 'Preparing…' : 'Share'}
+          </button>
+          {!embed && <button className="btn btn--text" onClick={onCapture}>Record video</button>}
         </div>
+        {shared && <p className="panel__hint" role="status" data-testid="share-status">{shared}</p>}
         {error && <p className="panel__error" role="alert">{error}</p>}
       </section>
       {viewing && <PrintViewer rec={rec} onClose={() => setViewing(false)} />}

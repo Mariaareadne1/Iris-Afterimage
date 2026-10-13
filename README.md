@@ -112,9 +112,17 @@ Replace the sample negatives with your scans:
 
 ## Social video
 
-Open the capture panel (◉) → **Record the showcase**. In Chromium-based
-browsers recent versions record MP4 directly; otherwise you get WebM.
-Convert with `scripts/webm-to-mp4.sh recording.webm` (requires ffmpeg).
+Open the capture panel (◉) → **Record the showcase** (recent Chromium-based
+browsers record MP4 directly; others give WebM). Browser recordings are
+variable-frame-rate and full-range, which X tends to mangle, so prepare them:
+
+```bash
+node scripts/prepare-video.mjs iris-afterimage-123.mp4   # → …-social.mp4
+```
+
+It uses your ffmpeg if it works, otherwise the bundled `ffmpeg-static`.
+`MAKE_DEMO=1 npx playwright test demo` (add `DEMO_SIZE=square` for 1:1)
+records the showcase headlessly into `captures/`.
 
 ## Project docs
 

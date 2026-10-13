@@ -56,9 +56,9 @@ single stall can't cascade.
 
 ## Known issues / limitations
 
-- `scripts/webm-to-mp4.sh` could not be exercised on the development machine:
-  the local Homebrew ffmpeg 8.1 fails to start (missing `libx265.216.dylib`).
-  Chromium 156 records MP4 directly, so conversion is only needed for WebM.
+- The local Homebrew ffmpeg 8.1 fails to start (missing `libx265.216.dylib`;
+  `brew reinstall ffmpeg` should fix it). The project no longer depends on it:
+  `scripts/prepare-video.mjs` falls back to the bundled `ffmpeg-static`.
 - The enlarger head is intentionally dim: it reads as a silhouette rather than
   a detailed model.
 - Split-grade printing, reciprocity failure and developer exhaustion are not
