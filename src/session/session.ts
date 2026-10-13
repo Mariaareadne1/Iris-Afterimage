@@ -106,7 +106,7 @@ export const TOOL_FEATHER = 0.85;
 export const STAGE_SECONDS = {
   place: 1.3,
   transfer: 2.6,
-  stop: 2.4,
+  stop: 3.0,
   fix: 3.6,
   wash: 3.0,
 } as const;

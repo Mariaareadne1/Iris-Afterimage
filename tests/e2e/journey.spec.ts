@@ -94,9 +94,18 @@ test('the print travels developer → stop → fix → line without getting stuc
   await page.getByTestId('stop-bath').click();
   for (const tray of ['stop', 'fix']) {
     await page.waitForFunction((t) => window.__iris!.room!.debug().paperLocation === t, tray, { timeout: 30_000 });
-    const c = await state<{ x: number }>(page, 'R.debug().centroid');
+    // once released it settles, centred and flat, in that tray
     const expected = { stop: 0.52, fix: 0.98 }[tray]!;
-    expect(Math.abs(c.x - expected)).toBeLessThan(0.08);
+    await page.waitForFunction(
+      (x) => {
+        const d = window.__iris!.room!.debug();
+        const inTray = Math.abs(d.centroid.x - x) < 0.06;
+        // the stop bath is brief; in the fixer the print must lie flat
+        return x < 0.9 ? inTray : inTray && d.heightRange.max - d.heightRange.min < 0.01;
+      },
+      expected,
+      { timeout: 10_000 },
+    );
   }
   await page.waitForFunction(() => window.__iris!.room!.debug().paperLocation === 'line', null, { timeout: 30_000 });
   expect(await state(page, 'R.debug().recoveries')).toBe(0);

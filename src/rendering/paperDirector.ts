@@ -86,6 +86,7 @@ export class PaperDirector {
   /** Put a fresh sheet back in the paper safe. */
   reset() {
     this.carry = null;
+    this.hang = null;
     this.slide = null;
     this.settle = null;
     this.userHolding = false;
@@ -149,8 +150,10 @@ export class PaperDirector {
     const hz = def.z - TRAY.d / 2 + this.sim.height / 2 + m;
     const hz2 = def.z + TRAY.d / 2 - this.sim.height / 2 - m;
     // a quarter-turned sheet would not fit: keep it near-square to the tray
-    let yaw = this.sim.yaw();
-    yaw = Math.abs(yaw) < 0.35 ? yaw : 0;
+    // after a tong carry the printer squares the sheet up; a dropped sheet
+    // keeps a small angle so it looks placed by hand
+    let yaw = centre ? 0 : this.sim.yaw();
+    yaw = Math.abs(yaw) < 0.2 ? yaw : 0;
     this.settle = {
       center: { x: Math.min(Math.max(c.x, hx), Math.max(hx, hx2)), y: TRAY.floor + TRAY_RIB + 0.0013, z: Math.min(Math.max(c.z, hz), Math.max(hz, hz2)) },
       yaw,
@@ -173,48 +176,56 @@ export class PaperDirector {
     });
   }
 
-  /** Lift the finished print by its top edge and hang it on the line. */
+  /**
+   * Lift the finished print by both top corners — two hands, or two pegs on a
+   * line being drawn up — and hang it. Carrying both corners together keeps
+   * the sheet's orientation under control, so it can't twist or fold.
+   */
   beginHang() {
     if (this.hangStarted) return;
     this.hangStarted = true;
     this.settle = null;
+    this.carry = null;
     const sim = this.sim;
-    const grip = sim.edgeMidIndex('top');
-    sim.clearPins();
-    const from = sim.vertex(grip);
     sim.endGrab();
-    sim.grabVertex(grip, 0.02);
+    sim.clearPins();
     sim.env = OPEN_ENV;
-    const to = { x: HANG.x, y: HANG.y - 0.008, z: HANG.z };
-    const mid = { x: (from.x + to.x) / 2, y: Math.max(from.y, to.y) + 0.12, z: (from.z + to.z) / 2 + 0.05 };
-    const duration = 2.2;
-    const start = this.time;
-    this.carry = {
-      plan: { from, to, layDir: { x: 0, z: 1 }, length: 0, clearance: 0 },
-      duration,
-      start,
-      dest: null,
-      onDone: () => {
-        // two clothes-pegs at the top corners
-        const tl = sim.cornerIndex('tl');
-        const tr = sim.cornerIndex('tr');
-        const half = sim.width / 2 - 0.003;
-        sim.endGrab();
-        sim.pin(tl, { x: HANG.x - half, y: DRYING_LINE.y - 0.006, z: HANG.z });
-        sim.pin(tr, { x: HANG.x + half, y: DRYING_LINE.y - 0.006, z: HANG.z });
-        this.location = 'line';
-      },
-    };
-    // custom path: arc up and over (not the lay-down path)
-    this.hangPath = (t: number) => {
-      const k = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-      const a = { x: from.x + (mid.x - from.x) * k, y: from.y + (mid.y - from.y) * Math.min(1, k * 1.5), z: from.z + (mid.z - from.z) * k };
-      const b = { x: mid.x + (to.x - mid.x) * k, y: mid.y + (to.y - mid.y) * k, z: mid.z + (to.z - mid.z) * k };
-      return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k, z: a.z + (b.z - a.z) * k };
+    const tl = sim.cornerIndex('tl');
+    const tr = sim.cornerIndex('tr');
+    const half = sim.width / 2 - 0.003;
+    const y = DRYING_LINE.y - 0.006;
+    this.hang = {
+      start: this.time,
+      duration: 2.6,
+      corners: [
+        { index: tl, from: sim.vertex(tl), to: { x: HANG.x - half, y, z: HANG.z } },
+        { index: tr, from: sim.vertex(tr), to: { x: HANG.x + half, y, z: HANG.z } },
+      ],
     };
   }
 
-  private hangPath: ((t: number) => Vec3) | null = null;
+  private hang: { start: number; duration: number; corners: { index: number; from: Vec3; to: Vec3 }[] } | null = null;
+
+  private updateHang() {
+    const h = this.hang;
+    if (!h) return;
+    const t = Math.min(1, (this.time - h.start) / h.duration);
+    const k = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    for (const c of h.corners) {
+      // rise first (peeling the print off the tray floor), then glide over
+      const rise = Math.min(1, k * 1.6);
+      const p = {
+        x: c.from.x + (c.to.x - c.from.x) * k,
+        y: c.from.y + (c.to.y - c.from.y) * rise + Math.sin(Math.PI * k) * 0.04,
+        z: c.from.z + (c.to.z - c.from.z) * k + Math.sin(Math.PI * k) * 0.06,
+      };
+      this.sim.pin(c.index, p);
+    }
+    if (t >= 1) {
+      this.hang = null;
+      this.location = 'line';
+    }
+  }
 
   /** React to session state changes. */
   sync(prev: SessionState | null, s: SessionState) {
@@ -230,7 +241,7 @@ export class PaperDirector {
         this.beginTransfer('developer', dur(STAGE_SECONDS.transfer) / 0.8 * 0.95);
         break;
       case 'stop':
-        this.beginTransfer('stop', dur(STAGE_SECONDS.stop));
+        this.beginTransfer('stop', dur(STAGE_SECONDS.stop) * 0.7);
         break;
       case 'fix':
         this.beginTransfer('fix', dur(STAGE_SECONDS.fix) * 0.7);
@@ -246,6 +257,7 @@ export class PaperDirector {
   /** Advance carries (in simulated seconds). */
   update(dt: number) {
     this.time += dt;
+    this.updateHang();
     if (this.slide) {
       const t = Math.min(1, (this.time - this.slide.start) / this.slide.duration);
       const k = 1 - Math.pow(1 - t, 3);
@@ -264,7 +276,7 @@ export class PaperDirector {
     const c = this.carry;
     if (!c) return;
     const t = Math.min(1, (this.time - c.start) / c.duration);
-    const p = this.hangPath && c.plan.length === 0 ? this.hangPath(t) : carryPoint(c.plan, t);
+    const p = carryPoint(c.plan, t);
     this.sim.moveGrab(p);
     if (c.dest && t > 0.45 && !c.arrived) {
       c.arrived = true;
@@ -273,15 +285,14 @@ export class PaperDirector {
     }
     if (t >= 1) {
       this.carry = null;
-      if (c.plan.length !== 0) this.sim.endGrab();
-      else this.hangPath = null;
+      this.sim.endGrab();
       c.onDone();
     }
   }
 
   /** Can the user pick the sheet up right now? */
   canUserGrab(s: SessionState): boolean {
-    if (this.carry || !this.visible) return false;
+    if (this.carry || this.hang || !this.visible) return false;
     if (s.stage === 'enlarger') return s.paper === 'easel' && s.lamp.mode === 'off' && s.locked;
     return s.stage === 'developing' || s.stage === 'finished';
   }

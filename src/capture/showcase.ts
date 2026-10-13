@@ -99,16 +99,23 @@ export async function runShowcase(session: DarkroomSession, room: Darkroom, opts
   session.develop();
   await until(session, (s) => s.stage === 'developing', signal);
   beat('Watching it appear');
-  await sleep(2500, signal);
-  room.rockTray(3);
-  await until(session, (s) => s.dev.clock > 22, signal);
-  room.rockTray(2.5);
-  await until(session, (s) => s.devProgress >= 1, signal);
+  // the reveal is the centrepiece — but keep a social clip moving
+  const baseSpeed = session.speed;
+  session.speed = baseSpeed * 1.6;
+  try {
+    await sleep(2500, signal);
+    room.rockTray(3);
+    await until(session, (s) => s.dev.clock > 22, signal);
+    room.rockTray(2.5);
+    await until(session, (s) => s.devProgress >= 1, signal);
+  } finally {
+    session.speed = baseSpeed;
+  }
   await sleep(1200, signal);
 
   beat('Stop, fix — lights on');
   session.stopBath();
   await until(session, (s) => s.stage === 'finished', signal);
   beat('The finished print');
-  await sleep(4500, signal);
+  await sleep(7000, signal);
 }

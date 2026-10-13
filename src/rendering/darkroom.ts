@@ -87,6 +87,7 @@ export class Darkroom {
   private resizeObserver: ResizeObserver;
   private unsubscribe: () => void;
   private rockTime = 0;
+  private lastLocation = '';
   private rockAuto = 0;
   private rockTilt = new THREE.Vector2();
   private rockVel = new THREE.Vector2();
@@ -327,6 +328,11 @@ export class Darkroom {
         return { target: V(t.x - 0.05, TRAY.liquid + 0.02, t.z), from: V(-0.05, 1.3, 0.85), fit: [0.6, 0.42] };
       }
       case 'finished':
+        // follow the print up out of the fixer before settling on the line
+        if (this.director.location !== 'line') {
+          const fix = trayById('fix');
+          return { target: V((fix.x + HANG.x) / 2, (TRAY.liquid + HANG.y) / 2 - 0.05, (fix.z + HANG.z) / 2), from: V(0, 0.45, 1), fit: [0.6, 0.8] };
+        }
         return { target: V(HANG.x, HANG.y - 0.13, HANG.z), from: V(0.0, 0.06, 1), fit: [0.4, 0.34] };
     }
   }
@@ -357,6 +363,10 @@ export class Darkroom {
     // choreography never outruns what the physics can simulate this frame
     const physDt = Math.min(dt, 0.1);
     this.director.update(physDt);
+    if (this.director.location !== this.lastLocation) {
+      this.lastLocation = this.director.location;
+      if (s.stage === 'finished') this.rig.setView(this.viewFor(s));
+    }
     this.paper.sim.step(physDt);
     this.paper.mesh.visible = this.director.visible;
     if (this.paper.mesh.visible) this.paper.sync();
@@ -496,7 +506,7 @@ export class Darkroom {
     const L = this.lightsLevel;
     this.hemi.color.setRGB(0.16 + L * 0.77, 0.03 + L * 0.7, 0.015 + L * 0.62);
     this.hemi.intensity = 0.45 + L * 0.85;
-    this.roomKey.intensity = L * 2.2;
+    this.roomKey.intensity = L * 1.5;
     this.safelight.light.intensity = 2.1 * (1 - L * 0.6);
     this.safelight2.light.intensity = 1.3 * (1 - L * 0.6);
     this.safelight.halo.material.opacity = 1 - L * 0.75;
