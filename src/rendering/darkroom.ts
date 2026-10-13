@@ -30,7 +30,7 @@ import {
   type TimerParts,
   type TrayParts,
 } from './props.ts';
-import { EASEL, EASEL_TOP, HANG, LENS, TRAY, TRAYS, trayById, type TrayDef } from './world.ts';
+import { COLUMN, EASEL, EASEL_TOP, HANG, LENS, TRAY, TRAYS, trayById, type TrayDef } from './world.ts';
 import { PointerController } from '../interaction/pointer.ts';
 
 export class WebGLUnavailableError extends Error {}
@@ -62,6 +62,7 @@ export class Darkroom {
   readonly liquids = new Map<TrayDef['id'], LiquidSurface>();
   private safelight: SafelightParts;
   private safelight2: SafelightParts;
+  private rim: THREE.PointLight;
   private line: LineParts;
   private timer: TimerParts;
   private beam: Beam;
@@ -165,6 +166,10 @@ export class Darkroom {
     }
     this.safelight = buildSafelight();
     this.scene.add(this.safelight.group);
+    // safelight spill on the wall behind the enlarger rims its silhouette
+    this.rim = new THREE.PointLight(0xff2a0c, 0.9, 1.1, 1.2);
+    this.rim.position.set(LENS.x + 0.12, LENS.y + 0.42, COLUMN.z - 0.14);
+    this.scene.add(this.rim);
     // a second, dimmer safelight over the enlarger end of the bench
     this.safelight2 = buildSafelight(0.55);
     this.safelight2.group.position.set(-0.95, 0.78, -0.5);
@@ -312,7 +317,8 @@ export class Darkroom {
       case 'enlarger': {
         const working = s.tool === 'dodge' || s.tool === 'burn' || s.tool === 'frame';
         if (working) return { target: V(EASEL.x, EASEL_TOP, EASEL.z + 0.01), from: V(0, 1.7, 0.75), fit: [0.36, 0.3] };
-        return { target: V(EASEL.x + 0.01, 0.2, EASEL.z), from: V(0.1, 0.62, 1), fit: [0.4, 0.56] };
+        // the whole enlarger — head, bellows, beam and easel — in one composition
+        return { target: V(EASEL.x + 0.01, 0.37, EASEL.z - 0.04), from: V(0.16, 0.42, 1), fit: [0.42, 0.86] };
       }
       case 'transfer':
         return { target: V((EASEL.x + dev.x) / 2, 0.12, 0.02), from: V(0, 0.75, 1), fit: [1.0, 0.55] };
@@ -509,6 +515,7 @@ export class Darkroom {
     this.roomKey.intensity = L * 1.5;
     this.safelight.light.intensity = 2.1 * (1 - L * 0.6);
     this.safelight2.light.intensity = 1.3 * (1 - L * 0.6);
+    this.rim.intensity = 0.9 * (1 - L);
     this.safelight.halo.material.opacity = 1 - L * 0.75;
     this.safelight2.halo.material.opacity = 1 - L * 0.75;
     this.scene.environment = L > 0.5 ? this.envs.lit : this.envs.dark;

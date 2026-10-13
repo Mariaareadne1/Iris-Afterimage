@@ -45,22 +45,24 @@ _Living log. Updated at every milestone so work can resume after an interruption
 - Playwright (production build, Chromium 156, hardware WebGL): see the latest
   run summary below.
 
-Full run on 2026-10-12: **25 passed, 2 skipped** (the opt-in `og` image
-generator and the `live` deployment check, which passed separately against
-https://mariaareadne1.github.io/Iris-Afterimage/). Desktop 1440×900 and Pixel 7.
+Full run on 2026-10-12 (after the share / video / enlarger pass):
+**43/43 unit, 28 passed + 3 skipped browser tests** (skipped = opt-in `og`
+image, `demo` video recording and `live` deployment check, each run
+separately). Desktop 1440×900 and Pixel 7.
 
-One intermittent failure was seen in an earlier full run (the crop test
-timed out waiting once under load). It did not reproduce in 4 isolated
-repeats or the next full run; the controls tests no longer run serially, so a
-single stall can't cascade.
+Earlier, one full run had a single crop-test timeout; it hasn't recurred, and
+the tray-journey test was made to wait for the print to settle after a trace
+showed the stop bath was too short (now 3 s).
+
+Demo videos (not committed, `captures/` is git-ignored): 16:9 and 1:1, ~45 s,
+H.264 30 fps, 31–37 MB, produced by `MAKE_DEMO=1 npx playwright test demo` +
+`node scripts/prepare-video.mjs`.
 
 ## Known issues / limitations
 
 - The local Homebrew ffmpeg 8.1 fails to start (missing `libx265.216.dylib`;
   `brew reinstall ffmpeg` should fix it). The project no longer depends on it:
   `scripts/prepare-video.mjs` falls back to the bundled `ffmpeg-static`.
-- The enlarger head is intentionally dim: it reads as a silhouette rather than
-  a detailed model.
 - Split-grade printing, reciprocity failure and developer exhaustion are not
   modelled (see docs/photography-model.md).
 - The Claude desktop browser pane throttles animation frames while hidden;

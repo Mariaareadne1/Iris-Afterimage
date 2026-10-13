@@ -35,7 +35,9 @@ checkerboard, flat grey.
 | `embed` | `?embed=1` inside an iframe: compact chrome, no gallery/capture, parent page still scrolls with the wheel over the iframe |
 | `capture` | canvas recording downloads a non-empty video whose extension matches the actual MediaRecorder container; the automated showcase runs the real workflow (with dodging) to a finished print |
 | `fallback` | with WebGL disabled the 2D darkroom still produces a real print |
-| `mobile` (Pixel 7) | full quick print by tapping; no overlapping controls; no horizontal overflow; manual drawer fits |
+| `share` | Share gives the native share sheet a real PNG of the print; without a share sheet it copies a clean link |
+| `mobile` (Pixel 7) | full quick print by tapping; no overlapping controls; no horizontal overflow; manual drawer fits; **dodging with a finger** (real touch events) holds light back only under the finger |
+| `demo` (opt-in, `MAKE_DEMO=1`) | records the showcase to `captures/` in 16:9 or 1:1 |
 | `visual` | screenshots of every stage for inspection |
 
 ## Latest results

@@ -7,7 +7,7 @@ src/
 ├── session/       DarkroomSession (state machine + model state), negatives loading/import, tiny store
 ├── rendering/     Three.js darkroom: scene props, print material, liquids, beam, camera rig, paper director, post
 ├── interaction/   pointer controller (tools, framing, grabbing paper, rocking the tray)
-├── capture/       export (worker PNG render), recorder (MediaRecorder), showcase (automated demo)
+├── capture/       export (worker PNG render), share (Web Share / clipboard), recorder (MediaRecorder), showcase
 └── components/    React interface (intro, top bar, film strip, enlarger/developer/finished panels, 2D fallback)
 ```
 

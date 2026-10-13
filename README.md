@@ -36,7 +36,8 @@ slowly surface under the red safelight.
 - **Your own photographs.** Import a JPEG/PNG/WebP; it stays in your browser.
   Portrait, landscape and square negatives get matching 8×10 sheets.
 - **Real exports.** Download the developed print as a 2400 px PNG, or on its
-  full 8×10 sheet with paper-white borders. A contact sheet collects the
+  full 8×10 sheet with paper-white borders; **Share** hands the print itself to
+  your phone's share sheet (or copies the link). A contact sheet collects the
   session's prints.
 - **Capture.** Hide the interface, record the canvas (MP4 where the browser's
   MediaRecorder supports it, otherwise WebM), or play an automated showcase
